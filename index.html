@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="V.G. Парковка">
+  <meta name="theme-color" content="#1a472a">
+  <title>V.G. Парковка & Трансфер — Расчёт</title>
+  
+  <style>
+    :root {
+      --primary: #1a472a;
+      --primary-dark: #12331f;
+      --primary-light: #e8f5e9;
+      --secondary: #d4b483;
+      --secondary-dark: #c09e6c;
+      --accent-green: #2e7d32;
+
+      --bg: #f0f4f0;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #5f6368;
+      --border: #ced4ce;
+      --danger: #d93025;
+      
+      --radius: 16px;
+      --shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 16px 20px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header-logo {
+      height: 58px;
+      width: auto;
+      max-width: 260px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .header h1 { 
+      margin: 0; 
+      font-size: 1.2rem; 
+      font-weight: 700; 
+      letter-spacing: -0.3px;
+      color: var(--secondary);
+    }
+    
+    .header p { 
+      margin: 4px 0 0; 
+      font-size: 0.8rem; 
+      opacity: 0.8; 
+    }
+
+    .btn-reset {
+      position: absolute;
+      top: calc(12px + env(safe-area-inset-top));
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-reset:active { background: rgba(255,255,255,0.3); transform: scale(0.95); }
+
+    .container { 
+      max-width: 480px; 
+      margin: 0 auto; 
+      padding: 16px; 
+      width: 100%;
+      flex: 1;
+    }
+    
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--primary);
+    }
+    
+    .card h2 .num {
+      background: var(--secondary);
+      color: var(--primary-dark);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      width: 100%;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:active { background: var(--primary-dark); }
+    .btn-secondary { background: var(--primary-light); color: var(--primary); }
+    .btn-secondary:active { background: #d7ebd9; }
+
+    .btn-share {
+      padding: 16px;
+      font-size: 1.05rem;
+      margin-top: 8px;
+      color: white;
+    }
+    .btn-share.system { background: linear-gradient(135deg, #5f6368, #3c4043); }
+    .btn-share.whatsapp { background: #25D366; }
+    .btn-share.telegram { background: #0088cc; }
+    .btn-share.viber { background: #7360f2; }
+
+    .photo-actions { display: flex; gap: 10px; margin-bottom: 12px; }
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f0f0f0;
+      border: 1px solid var(--border);
+    }
+    .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-item .remove {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: none;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .photo-count { font-size: 0.85rem; color: var(--muted); margin-top: 10px; text-align: center; }
+    .empty-photos {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-family: inherit;
+      background: #fafafa;
+      transition: all 0.15s;
+      -webkit-appearance: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+    }
+    
+    .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .switch-row span {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--accent-green); }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 14px;
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--accent-green);
+      cursor: pointer;
+      margin: 0;
+    }
+    .checkbox-row label { margin: 0; font-size: 1rem; font-weight: 600; color: var(--text); cursor: pointer; flex: 1; }
+
+    .rate-options, .pay-options, .currency-options { 
+      display: grid; gap: 10px; 
+    }
+    .rate-options { grid-template-columns: repeat(3, 1fr); }
+    .pay-options { grid-template-columns: 1fr 1fr; }
+    .currency-options { grid-template-columns: repeat(3, 1fr); }
+
+    .opt-card { position: relative; }
+    .opt-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .opt-card label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 8px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      background: #fafafa;
+      text-align: center;
+      height: 100%;
+    }
+    
+    .opt-card input:checked + label {
+      border-color: var(--accent-green);
+      background: var(--primary-light);
+      color: var(--accent-green);
+    }
+    .opt-card label span {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .opt-card input:checked + label span { color: var(--accent-green); }
+    .pay-options .opt-card label { flex-direction: row; gap: 8px; padding: 12px; }
+
+    .custom-input-box {
+      margin-top: 10px;
+    }
+
+    .result-box {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 4px;
+      border: 1px solid #a5d6a7;
+    }
+    
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .result-row:last-child { border-bottom: none; padding-top: 14px; }
+    
+    .result-row .label { font-size: 0.95rem; color: var(--accent-green); }
+    .result-row .value { font-size: 1.15rem; font-weight: 700; color: #1b5e20; }
+    
+    .result-row.total .value { 
+      font-size: 1.5rem; 
+      color: var(--accent-green);
+    }
+    
+    .days-info { 
+      text-align: center; 
+      font-size: 1rem; 
+      color: var(--accent-green); 
+      margin-bottom: 12px; 
+      font-weight: 600; 
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .share-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .share-buttons .btn-share { margin: 0; padding: 14px; font-size: 0.9rem; }
+    
+    .note { font-size: 0.8rem; color: var(--muted); margin-top: 10px; line-height: 1.4; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+    .hidden { display: none !important; }
+    
+    .paid-options {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .paid-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 8px;
+      margin-top: 12px;
+    }
+    .paid-label:first-child { margin-top: 0; }
+
+    .toast {
+      position: fixed;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s, bottom 0.3s;
+      pointer-events: none;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .toast.show { opacity: 1; bottom: calc(30px + env(safe-area-inset-bottom)); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <button type="button" class="btn-reset" id="btnReset" title="Очистить всё">🗑️</button>
+    <!-- Inline SVG logo (внешняя ссылка была недоступна) -->
+    <svg class="header-logo" id="logoImg" viewBox="0 0 280 70" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="V.G. Parking & Transfer">
+      <defs>
+        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e8c98a"/>
+          <stop offset="50%" stop-color="#d4b483"/>
+          <stop offset="100%" stop-color="#c09e6c"/>
+        </linearGradient>
+      </defs>
+      <!-- Shield / badge background -->
+      <rect x="4" y="8" width="54" height="54" rx="12" fill="rgba(255,255,255,0.12)" stroke="url(#goldGrad)" stroke-width="2.5"/>
+      <!-- V.G. letters -->
+      <text x="31" y="45" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="800" font-size="26" fill="url(#goldGrad)">V.G.</text>
+      <!-- Brand text -->
+      <text x="72" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="700" font-size="20" fill="#d4b483">PARKING</text>
+      <text x="72" y="54" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="500" font-size="13" fill="rgba(255,255,255,0.85)">&amp; TRANSFER</text>
+    </svg>
+    <h1>Расчёт парковки</h1>
+    <p>Фото • Период • Отправка</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2><span class="num">1</span> Фотографии автомобиля</h2>
+      <div class="photo-actions">
+        <button type="button" class="btn btn-primary" id="btnCamera">📷 Камера</button>
+        <button type="button" class="btn btn-secondary" id="btnGallery">🖼️ Галерея</button>
+      </div>
+      <input type="file" id="inputCamera" accept="image/*" capture="environment" class="hidden">
+      <input type="file" id="inputGallery" accept="image/*" multiple class="hidden">
+      
+      <div id="photosEmpty" class="empty-photos">
+        Сделайте снимок или выберите фото из галереи.
+      </div>
+      <div id="photosGrid" class="photos-grid hidden"></div>
+      <div id="photoCount" class="photo-count hidden"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">2</span> Госномер машины</h2>
+      <label for="carNumber">Введите номер</label>
+      <input type="text" id="carNumber" placeholder="Например: ABC 123" autocomplete="off" autocapitalize="characters">
+    </div>
+
+    <div class="card">
+      <h2><span class="num">3</span> Период парковки</h2>
+      <div class="date-row">
+        <div>
+          <label for="dateFrom">Дата въезда</label>
+          <input type="date" id="dateFrom">
+        </div>
+        <div>
+          <label for="dateTo">Дата выезда</label>
+          <input type="date" id="dateTo">
+        </div>
+      </div>
+      
+      <div class="switch-row">
+        <span>Включать последний день (+1)</span>
+        <label class="switch">
+          <input type="checkbox" id="includeLastDayToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">4</span> Тариф парковки</h2>
+      <div class="rate-options">
+        <div class="opt-card rate-option">
+          <input type="radio" name="rate" id="rate150" value="150" checked>
+          <label for="rate150">150 <span>лей/сут</span></label>
+        </div>
+        <div class="opt-card rate-option">
+          <input type="radio" name="rate" id="rate120" value="120">
+          <label for="rate120">120 <span>лей/сут</span></label>
+        </div>
+        <div class="opt-card rate-option">
+          <input type="radio" name="rate" id="rateCustom" value="custom">
+          <label for="rateCustom">Своя <span>цена</span></label>
+        </div>
+      </div>
+      
+      <div id="customRateBox" class="custom-input-box hidden">
+        <label for="customRateInput">Тариф со скидкой (лей/сутки)</label>
+        <input type="number" id="customRateInput" placeholder="Введите сумму..." min="0">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">5</span> Дополнительно</h2>
+      <label for="parkingSpot">Место на парковке</label>
+      <input type="text" id="parkingSpot" placeholder="Например: Сектор А, место 12" autocomplete="off">
+      
+      <div class="checkbox-row">
+        <input type="checkbox" id="paidCheckbox">
+        <label for="paidCheckbox">✅ Клиент оплатил</label>
+      </div>
+
+      <div id="paidOptions" class="paid-options hidden">
+        <div class="paid-label">Сумма оплаты</div>
+        <div class="pay-options" style="margin-bottom: 10px;">
+          <div class="opt-card">
+            <input type="radio" name="payAmountType" id="payAmountFull" value="full" checked>
+            <label for="payAmountFull">Полная</label>
+          </div>
+          <div class="opt-card">
+            <input type="radio" name="payAmountType" id="payAmountCustom" value="custom">
+            <label for="payAmountCustom">Другая</label>
+          </div>
+        </div>
+
+        <div id="customPaidAmountBox" class="custom-input-box hidden" style="margin-bottom: 14px;">
+          <label for="customPaidAmountInput">Фактически оплачено (лей)</label>
+          <input type="number" id="customPaidAmountInput" placeholder="Введите полученную сумму..." min="0">
+        </div>
+
+        <div class="paid-label">Способ оплаты</div>
+        <div class="pay-options">
+          <div class="opt-card pay-option">
+            <input type="radio" name="payMethod" id="payCash" value="cash" checked>
+            <label for="payCash">💵 Наличные</label>
+          </div>
+          <div class="opt-card pay-option">
+            <input type="radio" name="payMethod" id="payCard" value="card">
+            <label for="payCard">💳 Карта</label>
+          </div>
+        </div>
+
+        <div class="paid-label">Валюта оплаты</div>
+        <div class="currency-options">
+          <div class="opt-card currency-option">
+            <input type="radio" name="payCurrency" id="curLei" value="lei" checked>
+            <label for="curLei">Lei <span>MDL</span></label>
+          </div>
+          <div class="opt-card currency-option">
+            <input type="radio" name="payCurrency" id="curUsd" value="usd">
+            <label for="curUsd">$ <span>USD</span></label>
+          </div>
+          <div class="opt-card currency-option">
+            <input type="radio" name="payCurrency" id="curEur" value="eur">
+            <label for="curEur">€ <span>EUR</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">6</span> Итоговый расчёт</h2>
+      <div class="result-box">
+        <div class="days-info" id="daysInfo">Выберите даты</div>
+        <div class="result-row total">
+          <span class="label">Итого к оплате</span>
+          <span class="value" id="totalLei">0 лей</span>
+        </div>
+        <div class="result-row">
+          <span class="label">В долларах (курс 16)</span>
+          <span class="value" id="totalUsd">0 $</span>
+        </div>
+        <div class="result-row">
+          <span class="label">В евро (курс 18)</span>
+          <span class="value" id="totalEur">0 €</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 30px;">
+      <h2><span class="num">7</span> Отправить отчёт</h2>
+      <button type="button" class="btn btn-share system" id="btnShareSystem">📤 Поделиться (Текст + Фото)</button>
+      
+      <p class="note">
+        <strong>Как отправить:</strong><br>
+        1. Нажмите WhatsApp / Telegram / Viber — текст <em>сразу копируется</em> и открывается мессенджер.<br>
+        2. В чате вставьте текст (долгое нажатие → Вставить) и прикрепите фото.<br>
+        3. Если мессенджер не открылся — нажмите «Показать текст» и скопируйте вручную.
+      </p>
+      
+      <div class="share-buttons">
+        <button type="button" class="btn btn-share whatsapp" id="btnWhatsApp">WhatsApp</button>
+        <button type="button" class="btn btn-share telegram" id="btnTelegram">Telegram</button>
+        <button type="button" class="btn btn-share viber" id="btnViber">Viber</button>
+        <button type="button" class="btn btn-secondary" id="btnCopy">📋 Копировать</button>
+      </div>
+      <button type="button" class="btn btn-secondary" id="btnShowText" style="margin-top:12px;">👁 Показать текст отчёта</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const RATES = { leiToUsd: 16, leiToEur: 18 };
+    const DEFAULT_RATE = 150;
+
+    const photos = [];
+    
+    const DOM = {
+      inputCamera: document.getElementById('inputCamera'),
+      inputGallery: document.getElementById('inputGallery'),
+      btnCamera: document.getElementById('btnCamera'),
+      btnGallery: document.getElementById('btnGallery'),
+      photosGrid: document.getElementById('photosGrid'),
+      photosEmpty: document.getElementById('photosEmpty'),
+      photoCount: document.getElementById('photoCount'),
+      carNumber: document.getElementById('carNumber'),
+      dateFrom: document.getElementById('dateFrom'),
+      dateTo: document.getElementById('dateTo'),
+      includeLastDayToggle: document.getElementById('includeLastDayToggle'),
+      customRateBox: document.getElementById('customRateBox'),
+      customRateInput: document.getElementById('customRateInput'),
+      parkingSpot: document.getElementById('parkingSpot'),
+      paidCheckbox: document.getElementById('paidCheckbox'),
+      paidOptions: document.getElementById('paidOptions'),
+      customPaidAmountBox: document.getElementById('customPaidAmountBox'),
+      customPaidAmountInput: document.getElementById('customPaidAmountInput'),
+      daysInfo: document.getElementById('daysInfo'),
+      totalLei: document.getElementById('totalLei'),
+      totalUsd: document.getElementById('totalUsd'),
+      totalEur: document.getElementById('totalEur'),
+      logoImg: document.getElementById('logoImg'),
+      toast: document.getElementById('toast'),
+      btnShareSystem: document.getElementById('btnShareSystem'),
+      btnWhatsApp: document.getElementById('btnWhatsApp'),
+      btnTelegram: document.getElementById('btnTelegram'),
+      btnViber: document.getElementById('btnViber'),
+      btnCopy: document.getElementById('btnCopy'),
+      btnShowText: document.getElementById('btnShowText')
+    };
+
+    const today = new Date().toISOString().split('T')[0];
+    DOM.dateFrom.value = today;
+    DOM.dateTo.value = today;
+
+    DOM.btnCamera.addEventListener('click', () => DOM.inputCamera.click());
+    DOM.btnGallery.addEventListener('click', () => DOM.inputGallery.click());
+
+    DOM.inputCamera.addEventListener('change', (e) => handleFileSelect(e));
+    DOM.inputGallery.addEventListener('change', (e) => handleFileSelect(e));
+
+    function handleFileSelect(e) {
+      if (!e.target.files) return;
+      const newFiles = Array.from(e.target.files);
+      
+      newFiles.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        if (photos.some(p => p.file.name === file.name && p.file.size === file.size)) return;
+        const url = URL.createObjectURL(file);
+        photos.push({ file, url });
+      });
+      renderPhotos();
+      e.target.value = '';
+    }
+
+    function removePhoto(index) {
+      if (index >= 0 && index < photos.length) {
+        URL.revokeObjectURL(photos[index].url);
+        photos.splice(index, 1);
+        renderPhotos();
+      }
+    }
+    window.removePhoto = removePhoto;
+
+    function renderPhotos() {
+      const hasPhotos = photos.length > 0;
+      DOM.photosEmpty.classList.toggle('hidden', hasPhotos);
+      DOM.photosGrid.classList.toggle('hidden', !hasPhotos);
+      DOM.photoCount.classList.toggle('hidden', !hasPhotos);
+      
+      if (!hasPhotos) return;
+
+      DOM.photoCount.textContent = `Добавлено фото: ${photos.length}`;
+      const fragment = document.createDocumentFragment();
+      photos.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'photo-item';
+        div.innerHTML = `
+          <img src="${p.url}" alt="Фото ${i+1}" loading="lazy">
+          <button class="remove" onclick="removePhoto(${i})" aria-label="Удалить">×</button>
+        `;
+        fragment.appendChild(div);
+      });
+      DOM.photosGrid.innerHTML = '';
+      DOM.photosGrid.appendChild(fragment);
+    }
+
+    DOM.paidCheckbox.addEventListener('change', () => {
+      DOM.paidOptions.classList.toggle('hidden', !DOM.paidCheckbox.checked);
+    });
+
+    document.querySelectorAll('input[name="rate"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const isCustom = r.value === 'custom';
+        DOM.customRateBox.classList.toggle('hidden', !isCustom);
+        updateCalc();
+      });
+    });
+
+    document.querySelectorAll('input[name="payAmountType"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const isCustom = r.value === 'custom';
+        DOM.customPaidAmountBox.classList.toggle('hidden', !isCustom);
+      });
+    });
+
+    DOM.customRateInput.addEventListener('input', updateCalc);
+
+    function calcDays() {
+      if (!DOM.dateFrom.value || !DOM.dateTo.value) return 0;
+      const from = new Date(DOM.dateFrom.value);
+      const to = new Date(DOM.dateTo.value);
+      if (to < from) return -1;
+      
+      const diffTime = to - from;
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (DOM.includeLastDayToggle.checked) {
+        diffDays += 1;
+      } else {
+        if (diffDays === 0) diffDays = 1;
+      }
+      
+      return diffDays;
+    }
+
+    function getRate() {
+      const checked = document.querySelector('input[name="rate"]:checked');
+      if (!checked) return DEFAULT_RATE;
+      if (checked.value === 'custom') {
+        const val = parseFloat(DOM.customRateInput.value);
+        return isNaN(val) ? 0 : val;
+      }
+      return parseInt(checked.value, 10);
+    }
+
+    function updateCalc() {
+      const days = calcDays();
+      const rate = getRate();
+      
+      if (days < 0) {
+        DOM.daysInfo.textContent = 'Дата выезда не может быть раньше въезда';
+        DOM.daysInfo.style.color = 'var(--danger)';
+        DOM.totalLei.textContent = '0 лей';
+        DOM.totalUsd.textContent = '0 $';
+        DOM.totalEur.textContent = '0 €';
+        return;
+      }
+
+      DOM.daysInfo.style.color = 'var(--accent-green)';
+      DOM.daysInfo.textContent = `${days} ${pluralDays(days)} × ${rate} лей`;
+      
+      const lei = days * rate;
+      const usd = lei / RATES.leiToUsd;
+      const eur = lei / RATES.leiToEur;
+      
+      DOM.totalLei.textContent = formatMoney(lei) + ' лей';
+      DOM.totalUsd.textContent = formatMoney(usd) + ' $';
+      DOM.totalEur.textContent = formatMoney(eur) + ' €';
+    }
+
+    [DOM.dateFrom, DOM.dateTo, DOM.includeLastDayToggle].forEach(el => el.addEventListener('change', updateCalc));
+    updateCalc();
+
+    function pluralDays(n) {
+      const cases = [2, 0, 1, 1, 1, 2];
+      return ['сутки', 'суток', 'суток'][(n % 100 > 4 && n % 100 < 20) ? 2 : cases[(n % 10 < 5) ? n % 10 : 5]];
+    }
+    
+    function formatMoney(n) { 
+      return n.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); 
+    }
+
+    function getRadioValue(name, defaultVal = '—') {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.value : defaultVal;
+    }
+
+    function getPayMethodText() {
+      const val = getRadioValue('payMethod');
+      return val === 'card' ? '💳 Карта' : '💵 Наличные';
+    }
+
+    function getPayCurrencyText() {
+      const val = getRadioValue('payCurrency');
+      if (val === 'usd') return '$ (USD)';
+      if (val === 'eur') return '€ (EUR)';
+      return 'Lei (MDL)';
+    }
+
+    function buildMessage() {
+      const number = DOM.carNumber.value.trim().toUpperCase() || '—';
+      const spot = DOM.parkingSpot.value.trim() || '—';
+      const days = calcDays();
+      const rate = getRate();
+      const totalLeiAmount = days * rate;
+      const fromStr = DOM.dateFrom.value ? DOM.dateFrom.value.split('-').reverse().join('.') : '—';
+      const toStr = DOM.dateTo.value ? DOM.dateTo.value.split('-').reverse().join('.') : '—';
+      
+      let paidStatusText = '❌ НЕ ОПЛАЧЕНО';
+      
+      if (DOM.paidCheckbox.checked) {
+        const amountType = getRadioValue('payAmountType');
+        if (amountType === 'custom' && DOM.customPaidAmountInput.value) {
+          const paidVal = parseFloat(DOM.customPaidAmountInput.value) || 0;
+          paidStatusText = `✅ ОПЛАЧЕНО (${formatMoney(paidVal)} лей)`;
+        } else {
+          paidStatusText = '✅ ОПЛАЧЕНО (Полностью)';
+        }
+      }
+
+      const header = `🚗 V.G. PARKING & TRANSFER\n`;
+      const details = `Отчёт по автомобилю\n` +
+                      `────────────────\n` +
+                      `Номер: *${number}*\n` +
+                      `Место: ${spot}\n` +
+                      `Период: ${fromStr} — ${toStr}\n` +
+                      `Дней: ${days} (Тариф: ${rate} лей/сут)\n` +
+                      `Статус: *${paidStatusText}*\n`;
+      
+      let paymentInfo = '';
+      if (DOM.paidCheckbox.checked) {
+        paymentInfo = `Способ: ${getPayMethodText()}\n` +
+                      `Валюта: ${getPayCurrencyText()}\n`;
+      }
+      
+      const footer = `────────────────\n` +
+                     `ИТОГО К ОПЛАТЕ: *${formatMoney(totalLeiAmount)} лей*\n` +
+                     `(или ${formatMoney(totalLeiAmount/RATES.leiToUsd)} $ / ${formatMoney(totalLeiAmount/RATES.leiToEur)} €)\n`;
+      
+      let msg = header + details + paymentInfo + footer;
+      if (photos.length > 0) msg += `\n📷 Прикреплено фото: ${photos.length} шт.`;
+      
+      return msg;
+    }
+
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    }
+
+    async function shareSystem() {
+      if (calcDays() < 0) {
+        showToast('⚠️ Выберите корректные даты');
+        return;
+      }
+
+      const rawText = buildMessage();
+      const plainText = rawText.replace(/\*/g, '');
+      const files = photos.map(p => p.file);
+      const carNum = DOM.carNumber.value.trim().toUpperCase();
+      const title = `Парковка V.G. — ${carNum || 'Отчёт'}`;
+
+      // 1. Web Share API (телефоны, HTTPS)
+      try {
+        if (files.length > 0 && navigator.canShare && navigator.canShare({ files })) {
+          await navigator.share({ files, text: plainText, title });
+          showToast('✅ Отправлено с фото!');
+          return;
+        }
+        if (navigator.share) {
+          await navigator.share({ text: plainText, title });
+          showToast(files.length > 0
+            ? 'ℹ️ Текст отправлен. Фото прикрепите вручную'
+            : '✅ Отправлено!');
+          return;
+        }
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        console.warn('navigator.share failed', err);
+      }
+
+      // 2. Fallback — копируем
+      const copied = await copyToClipboard(rawText);
+      showToast(copied
+        ? (files.length > 0
+          ? '📋 Текст скопирован. Вставьте в чат и прикрепите фото'
+          : '📋 Текст скопирован в буфер')
+        : '❌ Не удалось. Нажмите «Копировать» или «Показать текст»');
+    }
+
+    async function openMessenger(type) {
+      if (calcDays() < 0) {
+        showToast('⚠️ Выберите даты');
+        return;
+      }
+
+      const text = buildMessage();
+      // Сначала всегда копируем — чтобы текст был под рукой, если ссылка не откроется
+      await copyToClipboard(text);
+
+      const encoded = encodeURIComponent(text);
+      let urls = [];
+
+      if (type === 'whatsapp') {
+        // App scheme (мобильный) + веб
+        if (isMobile()) {
+          urls.push(`whatsapp://send?text=${encoded}`);
+        }
+        urls.push(`https://api.whatsapp.com/send?text=${encoded}`);
+        urls.push(`https://wa.me/?text=${encoded}`);
+      } else if (type === 'telegram') {
+        if (isMobile()) {
+          urls.push(`tg://msg?text=${encoded}`);
+        }
+        urls.push(`https://t.me/share/url?url=_&text=${encoded}`);
+      } else if (type === 'viber') {
+        urls.push(`viber://forward?text=${encoded}`);
+        // Веб-фоллбек нет — только копирование
+      }
+
+      if (urls.length === 0) {
+        showToast('📋 Текст скопирован — вставьте в Viber');
+        return;
+      }
+
+      // Открываем через временную ссылку (реже блокируется, чем window.open)
+      const a = document.createElement('a');
+      a.href = urls[0];
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // Если первый URL — app-scheme, через 1.5 сек пробуем веб (на случай если приложение не установлено)
+      if (urls.length > 1 && isMobile() && urls[0].includes('://') && !urls[0].startsWith('http')) {
+        setTimeout(() => {
+          const a2 = document.createElement('a');
+          a2.href = urls[1];
+          a2.target = '_blank';
+          a2.rel = 'noopener noreferrer';
+          document.body.appendChild(a2);
+          a2.click();
+          document.body.removeChild(a2);
+        }, 1500);
+      }
+
+      showToast(photos.length > 0
+        ? '📋 Текст скопирован. Откройте чат и прикрепите фото'
+        : '📋 Текст скопирован. Откройте чат и вставьте');
+    }
+
+    async function copyToClipboard(text) {
+      // 1. Clipboard API (HTTPS / localhost)
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch (e) {
+          console.warn('clipboard.writeText failed', e);
+        }
+      }
+
+      // 2. execCommand — работает на file:// и старых браузерах
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;top:0;left:0;width:2em;height:2em;padding:0;border:none;outline:none;box-shadow:none;background:transparent;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (ok) return true;
+      } catch (e) {
+        console.warn('execCommand copy failed', e);
+      }
+
+      return false;
+    }
+
+    async function copyText() {
+      if (calcDays() < 0) {
+        showToast('⚠️ Нечего копировать');
+        return;
+      }
+      const ok = await copyToClipboard(buildMessage());
+      showToast(ok ? '📋 Текст скопирован в буфер!' : '❌ Ошибка копирования — нажмите «Показать текст»');
+    }
+
+    function showMessagePreview() {
+      if (calcDays() < 0) {
+        showToast('⚠️ Выберите даты');
+        return;
+      }
+      const text = buildMessage().replace(/\*/g, '');
+      const overlay = document.createElement('div');
+      overlay.id = 'msgPreviewOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:flex-end;justify-content:center;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));';
+      
+      const box = document.createElement('div');
+      box.style.cssText = 'background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:75vh;display:flex;flex-direction:column;box-shadow:0 -4px 24px rgba(0,0,0,0.2);';
+      
+      const header = document.createElement('div');
+      header.style.cssText = 'padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;';
+      header.innerHTML = '<strong style="font-size:1.05rem;color:#1a472a;">Текст отчёта</strong>';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '✕';
+      closeBtn.style.cssText = 'border:none;background:#f0f0f0;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;';
+      closeBtn.onclick = () => overlay.remove();
+      header.appendChild(closeBtn);
+      
+      const pre = document.createElement('pre');
+      pre.textContent = text;
+      pre.style.cssText = 'margin:0;padding:16px 20px;overflow:auto;flex:1;font-size:0.9rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;font-family:inherit;';
+      
+      const actions = document.createElement('div');
+      actions.style.cssText = 'padding:12px 16px;display:flex;gap:10px;border-top:1px solid #eee;';
+      
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'btn btn-primary';
+      copyBtn.textContent = '📋 Копировать';
+      copyBtn.style.cssText = 'flex:1;';
+      copyBtn.onclick = async () => {
+        const ok = await copyToClipboard(buildMessage());
+        showToast(ok ? '📋 Скопировано!' : '❌ Не удалось скопировать');
+        if (ok) setTimeout(() => overlay.remove(), 800);
+      };
+      
+      const closeBtn2 = document.createElement('button');
+      closeBtn2.className = 'btn btn-secondary';
+      closeBtn2.textContent = 'Закрыть';
+      closeBtn2.style.cssText = 'flex:1;';
+      closeBtn2.onclick = () => overlay.remove();
+      
+      actions.appendChild(copyBtn);
+      actions.appendChild(closeBtn2);
+      box.appendChild(header);
+      box.appendChild(pre);
+      box.appendChild(actions);
+      overlay.appendChild(box);
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
+    }
+
+    DOM.btnShareSystem.addEventListener('click', shareSystem);
+    DOM.btnWhatsApp.addEventListener('click', () => openMessenger('whatsapp'));
+    DOM.btnTelegram.addEventListener('click', () => openMessenger('telegram'));
+    DOM.btnViber.addEventListener('click', () => openMessenger('viber'));
+    DOM.btnCopy.addEventListener('click', copyText);
+    DOM.btnShowText.addEventListener('click', showMessagePreview);
+
+    let toastTimer;
+    function showToast(msg) {
+      DOM.toast.textContent = msg;
+      DOM.toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => DOM.toast.classList.remove('show'), 4500);
+    }
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      if (!confirm('🗑️ Очистить все данные?')) return;
+
+      photos.forEach(p => URL.revokeObjectURL(p.url));
+      photos.length = 0;
+      renderPhotos();
+
+      DOM.carNumber.value = '';
+      DOM.parkingSpot.value = '';
+      DOM.customRateInput.value = '';
+      DOM.customPaidAmountInput.value = '';
+      
+      DOM.paidCheckbox.checked = false;
+      DOM.paidOptions.classList.add('hidden');
+      DOM.customRateBox.classList.add('hidden');
+      DOM.customPaidAmountBox.classList.add('hidden');
+
+      document.getElementById('payCash').checked = true;
+      document.getElementById('curLei').checked = true;
+      document.getElementById('payAmountFull').checked = true;
+      document.getElementById('rate150').checked = true;
+
+      DOM.dateFrom.value = today;
+      DOM.dateTo.value = today;
+      DOM.includeLastDayToggle.checked = true;
+
+      updateCalc();
+      showToast('🧹 Всё очищено!');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
